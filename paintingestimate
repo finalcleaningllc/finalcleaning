@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Painting Proposal Generator</title>
+  <style>
+    body { background:#f7f9fc; font-family:Arial,sans-serif; color:#333; margin:0; padding:0; }
+    .container{ max-width:600px; margin:20px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    h1,h2,h3 { color:#003366; margin:0; padding:0; }
+    h1 { text-align:right; font-size:36px; }
+    h2 { text-align:center; margin-top:20px; }
+    .section { margin-top:20px; }
+    label { display:block; margin:10px 0 5px; font-weight:bold; }
+    input, select { width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; }
+    .checkbox-group label { display:inline-block; margin-right:12px; }
+    button { background:#003366; color:#fff; padding:10px 16px; border:none; border-radius:4px; cursor:pointer; margin:10px 5px 0; }
+    .summary { background:#e6f0fa; padding:15px; border-radius:4px; margin-top:20px; font-size:14px; }
+    .note { font-size:12px; color:#666; margin-top:5px; }
+    
+    .company-info { 
+      padding-bottom: 10px; 
+      border-bottom: 1px solid #eee;
+      margin-bottom: 20px;
+    }
+    .two-columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .two-columns > div {
+      flex: 1;
+      min-width: 250px;
+    }
+    .stage-details {
+      margin-left: 20px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-left: 3px solid #003366;
+      display: none;
+    }
+    .stage-details.active {
+      display: block;
+    }
+    .price-input {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .price-input input {
+      flex: 1;
+    }
+    .price-input span {
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="company-info">
+      <h1>PAINTING PROPOSAL</h1>
+      <div style="text-align:left; font-size:14px; color:#666;">
+        <strong>Final Cleaning LLC</strong><br>
+        853 Iva Loy Dr, Eight Mile AL 36613<br>
+        Phone: 503-209-4280 • Email: finalcleaningllc@gmail.com<br>
+        Web: finalcleaning.taplink.ws
+      </div>
+    </div>
+
+    <div class="two-columns">
+      <div>
+        <div class="section">
+          <h2>Client Information</h2>
+          <label>Company/Name:</label>
+          <input type="text" id="clientName" placeholder="Enter client name" required>
+          
+          <label>Address:</label>
+          <input type="text" id="clientAddress" placeholder="Enter client address" required>
+
+          <label>Contact Person:</label>
+          <input type="text" id="contactPerson" placeholder="Enter contact person" required>
+
+          <label>Contact Phone:</label>
+          <input type="text" id="contactPhone" placeholder="Enter contact phone" required>
+
+          <label>Contact Email:</label>
+          <input type="email" id="contactEmail" placeholder="Enter contact email" required>
+        </div>
+      </div>
+
+      <div>
+        <div class="section">
+          <h2>Project Information</h2>
+          <label>Proposal #:</label>
+          <input type="text" id="proposalNumber" readonly>
+
+          <label>Project Name:</label>
+          <input type="text" id="projectName" placeholder="Enter project name" required>
+
+          <label>Project Address:</label>
+          <input type="text" id="projectAddress" placeholder="Enter project address" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painting Parameters -->
+    <div class="section">
+      <h2>Painting Parameters</h2>
+      <label>Total Area to Paint (sq ft):</label>
+      <input type="number" id="area" placeholder="e.g. 1500" min="0" required>
+      
+      <label>Surface Type:</label>
+      <select id="surfaceType">
+        <option value="drywall">Drywall/Plaster</option>
+        <option value="wood">Wood</option>
+        <option value="metal">Metal</option>
+        <option value="concrete">Concrete</option>
+        <option value="brick">Brick/Stone</option>
+        <option value="other">Other</option>
+      </select>
+      
+      <label>Paint Type:</label>
+      <select id="paintType">
+        <option value="latex">Latex Paint</option>
+        <option value="oil">Oil-based Paint</option>
+        <option value="epoxy">Epoxy Coating</option>
+        <option value="special">Specialty Coating</option>
+      </select>
+      
+      <label>Number of Coats:</label>
+      <input type="number" id="coats" min="1" value="2" required>
+    </div>
+
+    <!-- Painting Stages -->
+    <div class="section">
+      <h2>Painting Stages</h2>
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" class="stage" value="prep" checked> 
+          Surface Preparation
+        </label>
+        <div id="prepDetails" class="stage-details active">
+          <div class="price-input">
+            <input type="number" id="prepPrice" placeholder="Price per sq ft" min="0" step="0.01" value="0.25">
+            <span>per sq ft</span>
+          </div>
+          <p class="note">Includes cleaning, sanding, and priming of surfaces</p>
+        </div>
+        
+        <label>
+          <input type="checkbox" class="stage" value="paint" checked> 
+          Painting
+        </label>
+        <div id="paintDetails" class="stage-details active">
+          <div class="price-input">
+            <input type="number" id="paintPrice" placeholder="Price per sq ft" min="0" step="0.01" value="1.50">
+            <span>per sq ft</span>
+          </div>
+          <p class="note">Main painting work with selected paint type</p>
+        </div>
+        
+        <label>
+          <input type="checkbox" class="stage" value="finish"> 
+          Finishing Touches
+        </label>
+        <div id="finishDetails" class="stage-details">
+          <div class="price-input">
+            <input type="number" id="finishPrice" placeholder="Price per sq ft" min="0" step="0.01" value="0.35">
+            <span>per sq ft</span>
+          </div>
+          <p class="note">Touch-ups, trim painting, and detail work</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Services -->
+    <div class="section">
+      <h2>Additional Services</h2>
+      
+      <label>Surface Preparation Hours:</label>
+      <input type="number" id="prepHours" placeholder="Hours" min="0" step="0.5" value="0">
+      <p class="note">For complex surface preparation beyond standard</p>
+
+      <label>Complex Elements (hours):</label>
+      <input type="number" id="complexHours" placeholder="Hours" min="0" step="0.5" value="0">
+      <p class="note">For detailed work on trim, molding, etc.</p>
+      
+      <label>Distance to Site (miles):</label>
+      <input type="number" id="distance" placeholder="e.g. 25" min="0" value="0">
+      <p class="note">Mobilization fee applies for projects under 20,000 sq ft and over 70 miles</p>
+      
+      <label>Custom Service Description:</label>
+      <input type="text" id="customServiceDesc" placeholder="Service name">
+      
+      <label>Custom Service Amount ($):</label>
+      <input type="number" id="customServiceAmount" placeholder="Amount" min="0" step="1" value="0">
+    </div>
+
+    <!-- Discounts -->
+    <div class="section">
+      <h2>Discounts</h2>
+      <label>Base Discount (%):</label>
+      <input type="number" id="discount" placeholder="e.g. 10" min="0" max="100" value="0">
+      
+      <label>Additional Discount (%):</label>
+      <input type="number" id="extraDiscount" placeholder="e.g. 5" min="0" max="100" value="0">
+    </div>
+
+    <!-- Actions -->
+    <div class="section" style="text-align:center;">
+      <button id="calcBtn">Calculate Estimate</button>
+      <button id="pdfBtn">Download PDF</button>
+      <div id="pdfLoading" class="note" style="display:none;">Preparing PDF... Please wait</div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <p><strong>Detailed Estimate:</strong></p>
+      <div id="detailedSummary"></div>
+      <p><strong>Subtotal: $<span id="subtotal">0.00</span></strong></p>
+      <p><strong>Total Discount: <span id="discountAmount">0.00</span>% ($<span id="discountValue">0.00</span>)</strong></p>
+      <p><strong>Total Cost: $<span id="totalCost">0.00</span></strong></p>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Auto-generate proposal #
+    (function generateProposalNumber() {
+      const d = new Date();
+      const key = d.toISOString().slice(0,10).replace(/-/g,'');
+      const storageKey = 'propCount-' + key;
+      let count = parseInt(sessionStorage.getItem(storageKey)) || 0;
+      count++;
+      sessionStorage.setItem(storageKey, count);
+      document.getElementById('proposalNumber').value = key + String(count).padStart(3, '0');
+    })();
+    
+    // Toggle stage details
+    document.querySelectorAll('.stage').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const detailsId = this.value + 'Details';
+        const detailsEl = document.getElementById(detailsId);
+        if (this.checked) {
+          detailsEl.classList.add('active');
+        } else {
+          detailsEl.classList.remove('active');
+        }
+      });
+    });
+    
+    // Painting calculation constants
+    const hourlyRate = 65;
+    const mobRate = 1.4; // Как в оригинальном коде
+    const complexHourlyRate = 85;
+
+    // Функция расчета мобилизации как в оригинальном коде
+    function calcMobilization(area, dist) {
+      if (area >= 20000 || dist <= 70) return 0;
+      return dist * mobRate;
+    }
+
+    // Format service names
+    function formatServiceName(stage) {
+      switch(stage) {
+        case 'prep': return 'Surface Preparation';
+        case 'paint': return 'Painting';
+        case 'finish': return 'Finishing Touches';
+        default: return stage.charAt(0).toUpperCase() + stage.slice(1);
+      }
+    }
+
+    function calculateCost() {
+      const area = +document.getElementById('area').value || 0;
+      const coats = +document.getElementById('coats').value || 1;
+      const dist = +document.getElementById('distance').value || 0;
+      const baseDiscount = +document.getElementById('discount').value || 0;
+      const extraDiscount = +document.getElementById('extraDiscount').value || 0;
+      const totalDiscountPct = baseDiscount + extraDiscount;
+      
+      const prepHours = +document.getElementById('prepHours').value || 0;
+      const complexHours = +document.getElementById('complexHours').value || 0;
+      
+      const stages = Array.from(document.querySelectorAll('.stage:checked')).map(cb => cb.value);
+      let subtotal = 0;
+      let html = '';
+      const lineItems = [];
+      const additional = [];
+
+      // Painting stages
+      stages.forEach(stage => {
+        const stageName = formatServiceName(stage);
+        const price = +document.getElementById(stage + 'Price').value || 0;
+        let cost = area * price;
+        
+        // For painting stage, multiply by number of coats
+        if (stage === 'paint') {
+          cost = cost * coats;
+        }
+        
+        subtotal += cost;
+        html += `<strong>${stageName}:</strong> $${price.toFixed(2)}/ft² × ${area} ft²`;
+        if (stage === 'paint') html += ` × ${coats} coats`;
+        html += ` → $${cost.toFixed(2)}<br>`;
+        
+        lineItems.push({ 
+          service: `${stageName} (${area} sq ft${stage === 'paint' ? ` × ${coats} coats` : ''})`, 
+          unitRate: `$${price.toFixed(2)}/sq ft`, 
+          amount: `$${cost.toFixed(2)}` 
+        });
+      });
+
+      // Mobilization - как в оригинальном коде
+      const mobCost = calcMobilization(area, dist);
+      if (mobCost > 0) {
+        subtotal += mobCost;
+        html += `<strong>Mobilization:</strong> $${mobRate.toFixed(2)}/mile × ${dist} miles → $${mobCost.toFixed(2)}<br>`;
+        additional.push({ 
+          service: `Mobilization (${dist} miles)`, 
+          unitRate: `$${mobRate.toFixed(2)}/mile`, 
+          amount: `$${mobCost.toFixed(2)}` 
+        });
+      }
+
+      // Surface Preparation Hours
+      if (prepHours > 0) {
+        const prepCost = prepHours * hourlyRate;
+        subtotal += prepCost;
+        html += `<strong>Extra Surface Prep:</strong> ${prepHours}h × $${hourlyRate}/h → $${prepCost.toFixed(2)}<br>`;
+        additional.push({ 
+          service: `Extra Surface Prep (${prepHours}h)`, 
+          unitRate: `$${hourlyRate}/h`, 
+          amount: `$${prepCost.toFixed(2)}` 
+        });
+      }
+
+      // Complex Elements
+      if (complexHours > 0) {
+        const complexCost = complexHours * complexHourlyRate;
+        subtotal += complexCost;
+        html += `<strong>Complex Elements:</strong> ${complexHours}h × $${complexHourlyRate}/h → $${complexCost.toFixed(2)}<br>`;
+        additional.push({ 
+          service: `Complex Elements Painting (${complexHours}h)`, 
+          unitRate: `$${complexHourlyRate}/h`, 
+          amount: `$${complexCost.toFixed(2)}` 
+        });
+      }
+
+      // Custom Service
+      const desc = document.getElementById('customServiceDesc').value.trim();
+      const amt  = +document.getElementById('customServiceAmount').value || 0;
+      if (desc && amt > 0) {
+        subtotal += amt;
+        html += `<strong>${desc}:</strong> $${amt.toFixed(2)}<br>`;
+        additional.push({ 
+          service: desc, 
+          unitRate: 'Flat fee', 
+          amount: `$${amt.toFixed(2)}` 
+        });
+      }
+
+      // Discounts
+      const discountValue = subtotal * (totalDiscountPct/100);
+      const grandTotal = subtotal - discountValue;
+
+      // Render summary
+      document.getElementById('detailedSummary').innerHTML = html;
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('discountAmount').textContent = totalDiscountPct.toFixed(2);
+      document.getElementById('discountValue').textContent = discountValue.toFixed(2);
+      document.getElementById('totalCost').textContent = grandTotal.toFixed(2);
+
+      // Save for PDF
+      window.calcData = { 
+        lineItems, 
+        additional, 
+        subtotal, 
+        totalDiscountPct, 
+        discountValue, 
+        grandTotal,
+        surfaceType: document.getElementById('surfaceType').value,
+        paintType: document.getElementById('paintType').value,
+        coats
+      };
+    }
+
+    async function generatePDF() {
+      calculateCost();
+      const btn = document.getElementById('pdfBtn');
+      const loading = document.getElementById('pdfLoading');
+      btn.disabled = true; 
+      loading.style.display='block';
+      
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'pt',format:'letter'});
+      let y = 60;
+
+      // Company Info - оригинальные контакты
+      doc.setFontSize(10).setTextColor('#666').setFont('helvetica','normal')
+         .text('Final Cleaning LLC', 40, y)
+         .text('853 Iva Loy Dr, Eight Mile AL 36613', 40, y+15)
+         .text('Phone: 503-209-4280 • Email: finalcleaningllc@gmail.com', 40, y+30)
+         .text('Web: finalcleaning.taplink.ws', 40, y+45);
+      
+      // Proposal Header
+      doc.setFontSize(36).setTextColor('#003366').setFont('helvetica','bold')
+         .text('PROPOSAL', 400, y+25);
+      
+      y += 70;
+
+      // Client and Project Info
+      doc.setFontSize(12).setTextColor('#003366').setFont('helvetica','bold')
+         .text('CLIENT INFORMATION:', 40, y);
+      doc.setFontSize(10).setTextColor('#333').setFont('helvetica','normal')
+         .text(document.getElementById('clientName').value, 40, y+20)
+         .text(document.getElementById('clientAddress').value, 40, y+35)
+         .text(`Contact: ${document.getElementById('contactPerson').value}`, 40, y+50)
+         .text(`Phone: ${document.getElementById('contactPhone').value}`, 40, y+65)
+         .text(`Email: ${document.getElementById('contactEmail').value}`, 40, y+80);
+      
+      doc.setFontSize(12).setTextColor('#003366').setFont('helvetica','bold')
+         .text('PROJECT INFORMATION:', 300, y);
+      doc.setFontSize(10).setTextColor('#333').setFont('helvetica','normal')
+         .text(document.getElementById('projectName').value, 300, y+20)
+         .text(document.getElementById('projectAddress').value, 300, y+35)
+         .text(`Area: ${+document.getElementById('area').value} sq ft`, 300, y+50)
+         .text(`Surface: ${document.getElementById('surfaceType').options[document.getElementById('surfaceType').selectedIndex].text}`, 300, y+65)
+         .text(`Paint: ${document.getElementById('paintType').options[document.getElementById('paintType').selectedIndex].text}`, 300, y+80);
+      
+      y += 100;
+      doc.setFontSize(10).setTextColor('#666')
+         .text(`Proposal #: ${document.getElementById('proposalNumber').value}`, 40, y)
+         .text(`Date: ${new Date().toLocaleDateString()}`, 400, y);
+      y += 25;
+
+      // Table header
+      const accent = '#003366';
+      doc.setDrawColor(accent).setFillColor(accent)
+         .rect(40, y, 515, 20, 'FD')
+         .setTextColor('#fff').setFontSize(11).setFont('helvetica','bold')
+         .text('SERVICE', 48, y+14)
+         .text('UNIT RATE', 240, y+14)
+         .text('AMOUNT', 450, y+14);
+      y += 30;
+      doc.setTextColor('#333').setFont('helvetica','normal').setFontSize(10);
+
+      // Items
+      const { lineItems, additional, subtotal, totalDiscountPct, discountValue, grandTotal, coats } = window.calcData;
+      lineItems.forEach(item => {
+        doc.text(item.service,48,y);
+        doc.text(item.unitRate,240,y);
+        doc.text(item.amount,450,y);
+        y+=20;
+      });
+      if (additional.length) {
+        y+=10;
+        doc.setFont('helvetica','normal').text('ADDITIONAL SERVICES:',48,y);
+        y+=20;
+        additional.forEach(item => {
+          doc.text(item.service,48,y);
+          doc.text(item.unitRate,240,y);
+          doc.text(item.amount,450,y);
+          y+=20;
+        });
+      }
+
+      // Subtotal & discounts
+      y+=10;
+      doc.setDrawColor('#ccc').setLineWidth(0.5).line(40,y,555,y); y+=15;
+      doc.setFont('helvetica','bold').setFontSize(11).setTextColor('#000')
+         .text('SUBTOTAL',240,y).text(`$${subtotal.toFixed(2)}`,450,y);
+      y+=20;
+      if (totalDiscountPct>0) {
+        doc.text(`Discount (${totalDiscountPct.toFixed(2)}%)`,240,y);
+        doc.text(`-$${discountValue.toFixed(2)}`,450,y);
+        y+=20;
+      }
+      doc.setDrawColor(accent).setLineWidth(1.5).line(40,y,555,y); y+=20;
+      doc.setFont('helvetica','bold').setFontSize(12).setTextColor('#000')
+         .text('TOTAL',240,y).text(`$${grandTotal.toFixed(2)}`,450,y);
+      y+=40;
+
+      // Notes & footer
+      const notes = [
+        'All painting includes standard surface preparation unless otherwise specified',
+        `All surfaces will receive ${coats} coat(s) of paint as specified`,
+        'Mobilization fee applies for projects under 20,000 sq ft and over 70 miles',
+        'Complex elements include trim, molding, decorative elements, and hard-to-reach areas'
+      ];
+      doc.setFontSize(9).setTextColor('#333');
+      notes.forEach(n => { doc.text('• '+n,45,y); y+=15; });
+
+      doc.setFontSize(8).setTextColor('#666')
+         .text('Thank you for the opportunity to propose. Payment terms: 50% deposit, balance upon completion.',40,750)
+         .text('finalcleaning.taplink.ws • 503-209-4280 • finalcleaningllc@gmail.com',40,765);
+
+      doc.save(`Painting_Proposal_${document.getElementById('proposalNumber').value}.pdf`);
+      btn.disabled = false; 
+      loading.style.display='none';
+    }
+
+    function loadScript(src) {
+      return new Promise((res, rej) => {
+        if (document.querySelector(`script[src="${src}"]`)) return res();
+        const s = document.createElement('script');
+        s.src = src; s.onload = res; s.onerror = () => rej();
+        document.head.appendChild(s);
+      });
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', calculateCost);
+    document.getElementById('pdfBtn').addEventListener('click', generatePDF);
+    calculateCost();
+  });
+  </script>
+</body>
+</html>
