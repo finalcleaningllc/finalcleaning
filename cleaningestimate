@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Cost Estimator</title>
+  <style>
+    body { background:#f7f9fc; font-family:Arial,sans-serif; color:#333; margin:0; padding:0; }
+    .container{ max-width:600px; margin:20px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    h1,h2,h3 { color:#003366; margin:0; padding:0; }
+    h1 { text-align:right; font-size:36px; }
+    h2 { text-align:center; margin-top:20px; }
+    .section { margin-top:20px; }
+    label { display:block; margin:10px 0 5px; font-weight:bold; }
+    input, select { width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; }
+    .checkbox-group label { display:inline-block; margin-right:12px; }
+    button { background:#003366; color:#fff; padding:10px 16px; border:none; border-radius:4px; cursor:pointer; margin:10px 5px 0; }
+    .summary { background:#e6f0fa; padding:15px; border-radius:4px; margin-top:20px; font-size:14px; }
+    .note { font-size:12px; color:#666; margin-top:5px; }
+    
+    .company-info { 
+      padding-bottom: 10px; 
+      border-bottom: 1px solid #eee;
+      margin-bottom: 20px;
+    }
+    .two-columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .two-columns > div {
+      flex: 1;
+      min-width: 250px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="company-info">
+      <h1>CLEANING PROPOSAL</h1>
+      <div style="text-align:left; font-size:14px; color:#666;">
+        <strong>Final Cleaning LLC</strong><br>
+        853 Iva Loy Dr, Eight Mile AL 36613<br>
+        Phone: 503-209-4280 • Email: finalcleaningllc@gmail.com<br>
+        Web: finalcleaning.taplink.ws
+      </div>
+    </div>
+
+    <div class="two-columns">
+      <div>
+        <div class="section">
+          <h2>General Contractor</h2>
+          <label>Company:</label>
+          <input type="text" id="clientName" placeholder="Enter client company" required>
+          
+          <label>Address:</label>
+          <input type="text" id="clientAddress" placeholder="Enter client company address" required>
+
+          <label>Contact Person:</label>
+          <input type="text" id="contactPerson" placeholder="Enter contact person" required>
+
+          <label>Contact Phone:</label>
+          <input type="text" id="contactPhone" placeholder="Enter contact phone" required>
+
+          <label>Contact Email:</label>
+          <input type="email" id="contactEmail" placeholder="Enter contact email" required>
+        </div>
+      </div>
+
+      <div>
+        <div class="section">
+          <h2>Project Information</h2>
+          <label>Proposal #:</label>
+          <input type="text" id="proposalNumber" readonly>
+
+          <label>Project Name:</label>
+          <input type="text" id="projectName" placeholder="Enter project name" required>
+
+          <label>Project Address:</label>
+          <input type="text" id="projectAddress" placeholder="Enter project address" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parameters -->
+    <div class="section">
+      <h2>Project Parameters</h2>
+      <label>Total Area (sq ft):</label>
+      <input type="number" id="area" placeholder="e.g. 15000" min="0" required>
+
+      <label>Object Type:</label>
+      <select id="objectType">
+        <option value="office">Office Buildings</option>
+        <option value="mall">Shopping Malls &amp; Stores</option>
+        <option value="warehouse">Warehouses</option>
+        <option value="medical">Medical Facilities</option>
+        <option value="restaurant">Restaurants</option>
+        <option value="gas">Gas Stations</option>
+        <option value="industrial">Industrial Properties</option>
+        <option value="lodging">Apartments &amp; Hotels</option>
+      </select>
+
+      <label>Distance to Site (miles):</label>
+      <input type="number" id="distance" placeholder="e.g. 25" min="0" required>
+      
+      <label>Base Discount (%):</label>
+      <input type="number" id="discount" placeholder="e.g. 10" min="0" max="100" value="0">
+      
+      <label>Extra Discount (%):</label>
+      <input type="number" id="extraDiscount" placeholder="e.g. 5" min="0" max="100" value="0">
+
+      <h3>Additional Manual Services</h3>
+      <label>Exterior Pressure Washing (hours):</label>
+      <input type="number" id="pressureWashingHours" placeholder="Hours" min="0" step="0.5">
+      <p class="note">Note: Lift for pressure washing is not provided. Must be provided by GC or rented separately.</p>
+
+      <label>Exterior Window Washing (hours, 2nd floor+):</label>
+      <input type="number" id="windowWashingHours" placeholder="Hours" min="0" step="0.5">
+      <p class="note">Note: Lift for window washing is not provided. Must be provided by GC or rented separately.</p>
+
+      <label>Custom Service Description:</label>
+      <input type="text" id="customServiceDesc" placeholder="Service name">
+
+      <label>Custom Service Amount ($):</label>
+      <input type="number" id="customServiceAmount" placeholder="Amount" min="0" step="1">
+    </div>
+
+    <!-- Cleaning Stages -->
+    <div class="section">
+      <h2>Cleaning Stages</h2>
+      <div class="checkbox-group">
+        <label><input type="checkbox" class="stage" value="rough" checked> Rough Cleaning</label>
+        <label><input type="checkbox" class="stage" value="spruce" checked> Spruce-Up Cleaning</label>
+        <label><input type="checkbox" class="stage" value="final" checked> Final Cleaning</label>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="section" style="text-align:center;">
+      <button id="calcBtn">Calculate Estimate</button>
+      <button id="pdfBtn">Download PDF</button>
+      <div id="pdfLoading" class="note" style="display:none;">Preparing PDF... Please wait</div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <p><strong>Detailed Estimate:</strong></p>
+      <div id="detailedSummary"></div>
+      <p><strong>Subtotal: $<span id="subtotal">0.00</span></strong></p>
+      <p><strong>Total Discount: <span id="discountAmount">0.00</span>% ($<span id="discountValue">0.00</span>)</strong></p>
+      <p><strong>Total Cost: $<span id="totalCost">0.00</span></strong></p>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Auto-generate proposal #
+    (function generateProposalNumber() {
+      const d = new Date();
+      const key = d.toISOString().slice(0,10).replace(/-/g,'');
+      const storageKey = 'propCount-' + key;
+      let count = parseInt(sessionStorage.getItem(storageKey)) || 0;
+      count++;
+      sessionStorage.setItem(storageKey, count);
+      document.getElementById('proposalNumber').value = key + String(count).padStart(3, '0');
+    })();
+
+    // Новые таблицы коэффициентов
+    const ratesByCoeff = {
+      rough:  { '0.7':0.10, '0.8':0.15, '0.9':0.20, '1.0':0.25, '1.1':0.30, '1.2':0.35 },
+      spruce: { '0.7':0.15, '0.8':0.20, '0.9':0.25, '1.0':0.30, '1.1':0.35, '1.2':0.40 },
+      final:  { '0.7':0.30, '0.8':0.35, '0.9':0.40, '1.0':0.45, '1.1':0.50, '1.2':0.55 }
+    };
+    const mobRate = 1.4;
+    const hourlyRate = 50;
+
+    // Area→coeff lookup
+    const coeffs = {
+      office:[[10000,1.0],[35000,0.9],[100000,0.8],[Infinity,0.7]],
+      mall:[[10000,1.0],[35000,0.9],[100000,0.8],[Infinity,0.7]],
+      warehouse:[[10000,0.9],[35000,0.8],[100000,0.75],[Infinity,0.7]],
+      medical:[[10000,1.2],[35000,1.1],[100000,1.0],[Infinity,0.9]],
+      restaurant:[[10000,1.1],[35000,1.0],[100000,0.9],[Infinity,0.8]],
+      gas:[[10000,1.0],[35000,0.9],[100000,0.8],[Infinity,0.75]],
+      industrial:[[10000,0.9],[35000,0.85],[100000,0.8],[Infinity,0.75]],
+      lodging:[[10000,1.0],[35000,0.95],[100000,0.85],[Infinity,0.8]]
+    };
+
+    function getCoeff(type, area) {
+      return coeffs[type].find(([lim]) => area <= lim)[1].toFixed(1);
+    }
+    function calcMobPerStage(area, dist) {
+      if (area >= 20000 || dist <= 70) return 0;
+      return dist * mobRate;
+    }
+
+    // Функция для правильного форматирования названий услуг
+    function formatServiceName(stage) {
+      switch(stage) {
+        case 'rough': return 'Rough';
+        case 'spruce': return 'Spruce-Up';
+        case 'final': return 'Final';
+        default: return stage.charAt(0).toUpperCase() + stage.slice(1);
+      }
+    }
+
+    function calculateCost() {
+      const area = +document.getElementById('area').value || 0;
+      const dist = +document.getElementById('distance').value || 0;
+      const type = document.getElementById('objectType').value;
+      const coeff = getCoeff(type, area);
+      const mobPer = calcMobPerStage(area, dist);
+      const baseDiscount = +document.getElementById('discount').value || 0;
+      const extraDiscount = +document.getElementById('extraDiscount').value || 0;
+      const totalDiscountPct = baseDiscount + extraDiscount;
+
+      const stages = Array.from(document.querySelectorAll('.stage:checked')).map(cb => cb.value);
+      let subtotal = 0;
+      let html = '';
+      const lineItems = [];
+      const additional = [];
+
+      // Cleaning stages
+      stages.forEach(stage => {
+        const stageName = formatServiceName(stage);
+        const unit = ratesByCoeff[stage][coeff] || 0;
+        const cost = area * unit;
+        subtotal += cost;
+        html += `<strong>${stageName} Cleaning:</strong> $${unit.toFixed(2)}/ft² → $${cost.toFixed(2)}<br>`;
+        lineItems.push({ service:`${stageName} Cleaning (${area} sq ft)`, unitRate:`$${unit.toFixed(2)}/sq ft`, amount:`$${cost.toFixed(2)}` });
+        if (mobPer > 0) {
+          subtotal += mobPer;
+          html += `<strong>Mobilization (${stageName}):</strong> $${mobRate.toFixed(2)}/mile × ${dist} → $${mobPer.toFixed(2)}<br>`;
+          lineItems.push({ service:`Mobilization (${stageName})`, unitRate:`$${mobRate.toFixed(2)}/mile × ${dist}`, amount:`$${mobPer.toFixed(2)}` });
+        }
+      });
+
+      // Pressure Washing
+      const pw = +document.getElementById('pressureWashingHours').value || 0;
+      if (pw > 0) {
+        const cost = pw * hourlyRate; subtotal += cost;
+        html += `<strong>Exterior Pressure Washing:</strong> ${pw}h × $${hourlyRate}/h → $${cost.toFixed(2)}<br>`;
+        additional.push({ service:`Exterior Pressure Washing (${pw}h)`, unitRate:`$${hourlyRate}/h`, amount:`$${cost.toFixed(2)}` });
+      }
+      // Window Washing
+      const ww = +document.getElementById('windowWashingHours').value || 0;
+      if (ww > 0) {
+        const cost = ww * hourlyRate; subtotal += cost;
+        html += `<strong>Exterior Window Washing:</strong> ${ww}h × $${hourlyRate}/h → $${cost.toFixed(2)}<br>`;
+        additional.push({ service:`Exterior Window Washing (${ww}h)`, unitRate:`$${hourlyRate}/h`, amount:`$${cost.toFixed(2)}` });
+      }
+      // Custom
+      const desc = document.getElementById('customServiceDesc').value.trim();
+      const amt  = +document.getElementById('customServiceAmount').value || 0;
+      if (desc && amt>0) {
+        subtotal += amt;
+        html += `<strong>${desc}:</strong> $${amt.toFixed(2)}<br>`;
+        additional.push({ service:desc, unitRate:'Flat fee', amount:`$${amt.toFixed(2)}` });
+      }
+
+      // Discounts
+      const discountValue = subtotal * (totalDiscountPct/100);
+      const grandTotal = subtotal - discountValue;
+
+      // Render summary
+      document.getElementById('detailedSummary').innerHTML = html;
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('discountAmount').textContent = totalDiscountPct.toFixed(2);
+      document.getElementById('discountValue').textContent = discountValue.toFixed(2);
+      document.getElementById('totalCost').textContent = grandTotal.toFixed(2);
+
+      // Save for PDF
+      window.calcData = { lineItems, additional, subtotal, totalDiscountPct, discountValue, grandTotal };
+    }
+
+    async function generatePDF() {
+      calculateCost();
+      const btn = document.getElementById('pdfBtn');
+      const loading = document.getElementById('pdfLoading');
+      btn.disabled = true; loading.style.display='block';
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'pt',format:'letter'});
+      let y = 60;
+
+      // Company Info
+      doc.setFontSize(10).setTextColor('#666').setFont('helvetica','normal')
+         .text('Final Cleaning LLC', 40, y)
+         .text('853 Iva Loy Dr, Eight Mile AL 36613', 40, y+15)
+         .text('Phone: 503-209-4280 • Email: finalcleaningllc@gmail.com', 40, y+30)
+         .text('Web: finalcleaning.taplink.ws', 40, y+45);
+      
+      // Proposal Header
+      doc.setFontSize(36).setTextColor('#003366').setFont('helvetica','bold')
+         .text('PROPOSAL', 400, y+25);
+      
+      y += 70;
+
+      // Клиент и проект в две колонки
+      doc.setFontSize(12).setTextColor('#003366').setFont('helvetica','bold')
+         .text('GENERAL CONTRACTOR:', 40, y);
+      doc.setFontSize(10).setTextColor('#333').setFont('helvetica','normal')
+         .text(document.getElementById('clientName').value, 40, y+20)
+         .text(document.getElementById('clientAddress').value, 40, y+35)
+         .text(`Contact: ${document.getElementById('contactPerson').value}`, 40, y+50)
+         .text(`Phone: ${document.getElementById('contactPhone').value}`, 40, y+65)
+         .text(`Email: ${document.getElementById('contactEmail').value}`, 40, y+80);
+      
+      doc.setFontSize(12).setTextColor('#003366').setFont('helvetica','bold')
+         .text('PROJECT INFORMATION:', 300, y);
+      doc.setFontSize(10).setTextColor('#333').setFont('helvetica','normal')
+         .text(document.getElementById('projectName').value, 300, y+20)
+         .text(document.getElementById('projectAddress').value, 300, y+35)
+         .text(`Area: ${+document.getElementById('area').value} sq ft`, 300, y+50);
+      
+      y += 100;
+      doc.setFontSize(10).setTextColor('#666')
+         .text(`Proposal #: ${document.getElementById('proposalNumber').value}`, 40, y)
+         .text(`Date: ${new Date().toLocaleDateString()}`, 400, y);
+      y += 25;
+
+      // Table header
+      const accent = '#003366';
+      doc.setDrawColor(accent).setFillColor(accent)
+         .rect(40, y, 515, 20, 'FD')
+         .setTextColor('#fff').setFontSize(11).setFont('helvetica','bold')
+         .text('SERVICE', 48, y+14)
+         .text('UNIT RATE', 240, y+14)
+         .text('AMOUNT', 450, y+14);
+      y += 30;
+      doc.setTextColor('#333').setFont('helvetica','normal').setFontSize(10);
+
+      // Items
+      const { lineItems, additional, subtotal, totalDiscountPct, discountValue, grandTotal } = window.calcData;
+      lineItems.forEach(item => {
+        doc.text(item.service,48,y);
+        doc.text(item.unitRate,240,y);
+        doc.text(item.amount,450,y);
+        y+=20;
+      });
+      if (additional.length) {
+        y+=10;
+        doc.setFont('helvetica','normal').text('ADDITIONAL SERVICES:',48,y);
+        y+=20;
+        additional.forEach(item => {
+          doc.text(item.service,48,y);
+          doc.text(item.unitRate,240,y);
+          doc.text(item.amount,450,y);
+          y+=20;
+        });
+      }
+
+      // Subtotal & discounts
+      y+=10;
+      doc.setDrawColor('#ccc').setLineWidth(0.5).line(40,y,555,y); y+=15;
+      doc.setFont('helvetica','bold').setFontSize(11).setTextColor('#000')
+         .text('SUBTOTAL',240,y).text(`$${subtotal.toFixed(2)}`,450,y);
+      y+=20;
+      if (totalDiscountPct>0) {
+        doc.text(`Discount (${totalDiscountPct.toFixed(2)}%)`,240,y);
+        doc.text(`-$${discountValue.toFixed(2)}`,450,y);
+        y+=20;
+      }
+      doc.setDrawColor(accent).setLineWidth(1.5).line(40,y,555,y); y+=20;
+      doc.setFont('helvetica','bold').setFontSize(12).setTextColor('#000')
+         .text('TOTAL',240,y).text(`$${grandTotal.toFixed(2)}`,450,y);
+      y+=40;
+
+      // Notes & footer
+      const notes = [
+        'Mobilization charged per cleaning stage for projects under 20,000 sq ft and over 70 miles',
+        'Lift for window & pressure washing is not provided; provided by GC or rented separately.'
+      ];
+      doc.setFontSize(9).setTextColor('#333');
+      notes.forEach(n => { doc.text('• '+n,45,y); y+=15; });
+
+      doc.setFontSize(8).setTextColor('#666')
+         .text('Thank you for the opportunity to propose.',40,750)
+         .text('www.finalcleaning.taplink.ws • 503-209-4280 • finalcleaningllc@gmail.com',40,765);
+
+      doc.save(`Proposal_${document.getElementById('proposalNumber').value}.pdf`);
+      btn.disabled = false; loading.style.display='none';
+    }
+
+    function loadScript(src) {
+      return new Promise((res, rej) => {
+        if (document.querySelector(`script[src="${src}"]`)) return res();
+        const s = document.createElement('script');
+        s.src = src; s.onload = res; s.onerror = () => rej();
+        document.head.appendChild(s);
+      });
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', calculateCost);
+    document.getElementById('pdfBtn').addEventListener('click', generatePDF);
+    calculateCost();
+  });
+  </script>
+</body>
+</html>
